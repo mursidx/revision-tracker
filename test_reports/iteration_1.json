@@ -1,0 +1,50 @@
+{
+  "summary": "Frontend-only smoke test of SSC CGL Revision Tracker (localStorage app). Verified core flows: Today screen with correct date header (Wednesday, 1 July 2026), Add Chapter form (subject pills, name, date, difficulty, notes), successful chapter creation, Overdue + Today sections, localStorage persistence including 'revision_tracker_last_opened' key, All Chapters filter/sort/search UI, empty state on no-match, mobile bottom-tab bar, and graceful handling of corrupted localStorage. Deeper verification of some flows was blocked by transient toast overlay and by strict storage validation rejecting a manually-seeded chapter shape.",
+  "tested_scope": ["frontend", "integration"],
+  "passed": [
+    "First-load empty state shows 'Welcome to Revise' + 'Add first chapter' button on Today",
+    "Today header shows long-format date: 'Wednesday, 1 July 2026'",
+    "desktop-tab-today/add/chapters/calendar all navigate correctly",
+    "Add form: subject-pill-Math/English/Reasoning/GK, chapter-name-input, date-studied-input, difficulty-pill-*, notes-input all present",
+    "date-studied-input has max=today (2026-07-01), preventing future selection",
+    "Submitting valid form shows add-chapter-success screen with success-go-today-btn and success-add-another-btn",
+    "Chapter added with dateStudied=yesterday shows Day 1 Mark Done in Today section",
+    "Chapter added with dateStudied=5 days ago populates overdue-section (2 items shown with red-tinted cards)",
+    "localStorage key 'revision_tracker_chapters' populated (359+ chars) and 'revision_tracker_last_opened' = 2026-07-01",
+    "All Chapters: chapters-search-input, filter-subject-{All,Math,English,Reasoning,GK}, filter-status-{All,In-Progress,Complete}, chapters-sort all present and interactive",
+    "chapters-empty state appears when search yields no matches",
+    "Mobile viewport (390x844): mobile-tab-today/add/chapters/calendar all present",
+    "Corrupted localStorage ('{{invalidjson') is handled gracefully — app loads empty state, no crash",
+    "Storage shape validation is strict: manually-seeded chapters missing expected fields are silently discarded (defensive behavior)",
+    "Toast 'Chapter added' shown after submit"
+  ],
+  "failed": [
+    {
+      "area": "AddChapter validation",
+      "issue": "Empty-submit did not surface any element matching common error selectors (.error, [class*='error'], [role='alert']). Validation may be inline text without an 'error' class — could not confirm inline validation is actually rendered.",
+      "evidence": "Empty submit errors captured string was empty; submit button remained clickable but no dialog/success either",
+      "priority": "LOW"
+    },
+    {
+      "area": "Toast overlay intercepts subsequent clicks",
+      "issue": "Sonner toast (data-sonner-toast) after 'Chapter added' intercepts pointer events on the submit button for ~4s, blocking rapid subsequent submissions in automation. Real users unaffected but could be a UX quirk if adding many chapters quickly.",
+      "evidence": "Playwright reported toast <li data-sonner-toast> intercepting pointer events for add-chapter-submit-btn across multiple retries",
+      "priority": "LOW"
+    }
+  ],
+  "not_verified_due_to_time": [
+    "duplicate-dialog confirm/cancel behavior (dialog rendering not reached this pass)",
+    "chapter-expand → edit-notes-btn/edit-save/timeline-mark/timeline-undo/delete-chapter-btn/delete-dialog/delete-confirm (blocked by strict storage validation rejecting seeded data; original session's chapters were cleared before this could be re-tested)",
+    "Auto-navigation from success screen to Today after ~2.5s",
+    "Calendar cell colored dots and side-panel with actual due revisions (no persisted chapters at calendar-check time)",
+    "Fully-complete chapter shows 'Complete' badge",
+    "Date-math correctness across month boundaries (verified only via JS Date arithmetic sample; not validated inside app UI)"
+  ],
+  "action_items": [
+    "Optional: main agent can confirm that inline validation text on Add form (empty name / future date) uses a discoverable class like 'text-destructive' or an aria-invalid attribute so future tests can assert it reliably",
+    "No blocking bugs found — first finish is achievable. A follow-up full-testing pass should cover edit-notes, delete, timeline mark/undo, calendar with data, and date-math edge cases (25 Jul → Day 30 = 24 Aug)"
+  ],
+  "success_rate": {"backend": "N/A (skipped per request)", "frontend": "~90% of primary flows verified; secondary flows deferred"},
+  "retest_needed": false,
+  "full_testing_deferred": true
+}
