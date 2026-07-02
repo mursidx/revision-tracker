@@ -37,7 +37,7 @@ export const Layout = () => {
               Revise
             </span>
             <span className="ml-2 text-[10px] font-semibold uppercase tracking-widest text-muted2">
-              SSC CGL
+              by Mursid
             </span>
           </div>
           <nav className="flex items-center gap-1">
@@ -72,7 +72,7 @@ export const Layout = () => {
             </span>
           </div>
           <span className="text-[10px] font-semibold uppercase tracking-widest text-muted2">
-            SSC CGL
+            by Mursid
           </span>
         </div>
       </header>
